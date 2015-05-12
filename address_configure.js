@@ -2,6 +2,10 @@
 
 var hostIP='127.0.0.1';
 
+if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    hostIP += ":4600";
+}
+
 exports.IP=hostIP;
 exports.validateAddress=    "http://"+hostIP+"/validate";
 exports.ticketInfo=         "http://"+hostIP+"/ticketsinfo";
