@@ -24,3 +24,6 @@ what to modify?
     To modify databases:    models/models.js
     To modify weixin keys:  weixin_basic/settings.js
     #REMEMBER TO ENSURE INDEX IN MONGODB, s'il vous plaît!
+
+[![Coverage Status](https://coveralls.io/repos/cgcgbcbc/wxTicket_forTest/badge.svg)](https://coveralls.io/r/cgcgbcbc/wxTicket_forTest)
+[![Build Status](https://travis-ci.org/cgcgbcbc/wxTicket_forTest.svg)](https://travis-ci.org/cgcgbcbc/wxTicket_forTest)
