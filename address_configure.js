@@ -3,7 +3,11 @@
 var hostIP='127.0.0.1';
 
 if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-    hostIP += ":4600";
+    if (process.env.PORT) {
+        hostIP += ":" + process.env.PORT
+    } else {
+        hostIP += ":4600";
+    }
 }
 
 exports.IP=hostIP;

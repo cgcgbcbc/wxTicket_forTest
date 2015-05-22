@@ -8,11 +8,19 @@ var models = require('../../models/models')
 var server;
 const Browser = require('zombie');
 before(function(done) {
-    app.set('port', 4600);
-    server = app.listen(app.get('port'), function(err) {
-        if (err != null) throw err;
-        done();
-    });
+    if (process.env.PORT) {
+        app.set('port', process.env.PORT);
+    } else {
+        app.set('port', 4600);
+    }
+    if (process.env.CI) {
+        server = app.listen(app.get('port'), function(err) {
+            if (err != null) throw err;
+            done();
+        });
+    } else {
+        done()
+    }
 });
 
 describe('functional test', function() {
