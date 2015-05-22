@@ -8,7 +8,6 @@ var models = require('../../models/models')
 var server;
 const Browser = require('zombie');
 before(function(done) {
-    Browser.localhost('127.0.0.1', 4600);
     app.set('port', 4600);
     server = app.listen(app.get('port'), function(err) {
         if (err != null) throw err;
@@ -17,6 +16,7 @@ before(function(done) {
 });
 
 describe('functional test', function() {
+    Browser.localhost('127.0.0.1', 4600);
     before(function(done) {
         db.dropDatabase(function(err) {
             if (err != null) throw  err;
