@@ -5,8 +5,31 @@
 var models = require('../../models/models')
     , db = models.db;
 const Browser = require('zombie');
+
+function fillDetailPage(browser, config) {
+    var operation,data;
+    function forEach(o, f) {
+        var k,v;
+        for (k in Object.keys(o)) {
+            v = o[k];
+            f(k,v);
+        }
+    }
+    for (operation in Object.keys(config)) {
+        data = config[operation];
+        switch(operation) {
+            case 'fill':
+                forEach(data, browser.fill);
+                break;
+            case 'select':
+                forEach(data, browser.select)
+        }
+    }
+    return browser;
+}
+
 describe("functional test", function() {
-    Browser.localhost('127.0.0.1', 4600);
+    Browser.localhost('127.0.0.1', process.env.PORT || 4600);
     before(function(done) {
         db.dropDatabase(function(err) {
             if (err != null) throw  err;
@@ -34,15 +57,6 @@ describe("functional test", function() {
             browser.destroy();
         });
 
-        function fillDetailPage(browser, data) {
-            var k,v;
-            for (k in Object.keys(data)) {
-                v = data[v];
-                browser = browser.fill(k,v);
-            }
-            return browser;
-        }
-
         it("should render detail page", function(done) {
             browser
                 .clickLink("新增活动")
@@ -51,6 +65,13 @@ describe("functional test", function() {
                     done()
                 });
         });
-
+        it("should not submit empty form" ,function(done) {
+            browser
+                .pressButton("发布")
+                .then(function() {
+                    browser.assert.text('title', '新建活动- 紫荆之声票务管理系统');
+                    done();
+                })
+        });
     });
 });

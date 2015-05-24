@@ -8,11 +8,7 @@ var models = require('../../models/models')
 var server;
 const Browser = require('zombie');
 before(function(done) {
-    if (process.env.PORT) {
-        app.set('port', process.env.PORT);
-    } else {
-        app.set('port', 4600);
-    }
+    app.set('port', process.env.PORT || 4600);
     if (process.env.CI) {
         server = app.listen(app.get('port'), function(err) {
             if (err != null) throw err;
@@ -24,7 +20,7 @@ before(function(done) {
 });
 
 describe('functional test', function() {
-    Browser.localhost('127.0.0.1', 4600);
+    Browser.localhost('127.0.0.1', process.env.PORT || 4600);
     before(function(done) {
         db.dropDatabase(function(err) {
             if (err != null) throw  err;

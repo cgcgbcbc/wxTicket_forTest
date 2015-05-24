@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === 'development') {
     dbUrl = 'mongodb://localhost/test';
 }
 
-exports.db = mongojs('mongodb://localhost/test23', [tickets, activities, students, admins, seats]);
+exports.db = mongojs(dbUrl, [tickets, activities, students, admins, seats]);
 
 exports.getIDClass = function (idValue) {
     idValue = "" + idValue;
