@@ -7,31 +7,22 @@ var request = require('supertest')
     , app = require('../../app')
     , agent = request.agent(app);
 
-var models = require('../../models/models')
-    , db = models.db;
-
 var fixture = require('../fixtures/activity_detail');
 
 var sinon = require('sinon');
 
 describe('test routes/user_manage', function() {
     before(function(done) {
-        db.dropDatabase(function(err) {
-            if (err != null) throw  err;
-            db[models.admins].save({user:'admin',password:'pwd',manager:true}, function(err) {
-                if (err != null) throw err;
-                agent
-                    .post("/login")
-                    .send({
-                        username: "admin",
-                        password: "pwd"
-                    })
-                    .expect(function(res) {
-                        should(res.text).be.a.String.and.match(/success/);
-                    })
-                    .end(done);
-            });
-        });
+        agent
+            .post("/login")
+            .send({
+                username: "admin",
+                password: "pwd"
+            })
+            .expect(function(res) {
+                should(res.text).be.a.String.and.match(/success/);
+            })
+            .end(done);
     });
     describe('/users/manage/detail', function() {
         describe('#POST', function() {
@@ -41,7 +32,7 @@ describe('test routes/user_manage', function() {
                     .post("/users/manage/detail")
                     .send(fixture[fixture.SUCCESS])
                     .expect(function(res) {
-                        should(res.text).be.a.String.and.match(/200/);
+                        should(res.text).be.a.String.and.match(/200/).and.match(/无选座票务/);
                     })
                     .end(function() {
                         clock.restore();

@@ -3,13 +3,11 @@
  */
 
 var app = require('../../app');
-var models = require('../../models/models')
-    , db = models.db;
 var server;
 const Browser = require('zombie');
 before(function(done) {
-    app.set('port', process.env.PORT || 4600);
     if (process.env.CI) {
+        app.set('port', process.env.PORT || 4600);
         server = app.listen(app.get('port'), function(err) {
             if (err != null) throw err;
             done();
@@ -21,18 +19,7 @@ before(function(done) {
 
 describe('functional test', function() {
     Browser.localhost('127.0.0.1', process.env.PORT || 4600);
-    before(function(done) {
-        db.dropDatabase(function(err) {
-            if (err != null) throw  err;
-            db[models.admins].save({user:'admin',password:'pwd',manager:true}, function(err) {
-                if (err != null) throw err;
-                db[models.admins].save({user:'user', password:'pwd'}, function(err) {
-                    if (err != null) throw err;
-                    done();
-                })
-            });
-        });
-    });
+
     describe('login', function() {
         var browser;
         beforeEach(function() {

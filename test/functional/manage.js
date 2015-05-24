@@ -2,8 +2,6 @@
  * Created by guangchen on 5/14/15.
  */
 
-var models = require('../../models/models')
-    , db = models.db;
 const Browser = require('zombie');
 
 function fillDetailPage(browser, config) {
@@ -30,15 +28,6 @@ function fillDetailPage(browser, config) {
 
 describe("functional test", function() {
     Browser.localhost('127.0.0.1', process.env.PORT || 4600);
-    before(function(done) {
-        db.dropDatabase(function(err) {
-            if (err != null) throw  err;
-            db[models.admins].save({user:'admin',password:'pwd',manager:true}, function(err) {
-                if (err != null) throw err;
-                done();
-            });
-        });
-    });
 
     describe("add detail", function() {
         var browser;
