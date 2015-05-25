@@ -287,10 +287,12 @@ describe('unit test', function () {
                 });
             });
             it('should not insert two ticket with same unique id', function(done) {
+                var cache = Math.random;
                 var floorStub = sinon.stub(Math, 'random');
                 for(var i = 0; i < 64; i++) floorStub.onCall(i).returns(0);
-                get_ticket('student1', 'stub_floor');
+                floorStub.returns(Math.random());
                 get_ticket('student2', 'stub_floor');
+                get_ticket('student3', 'stub_floor');
                 sendAsyncCallStub.on('called', function () {
                     should(stubSpy.callCount).be.above(0);
                     if (stubSpy.callCount === 2) {
@@ -309,6 +311,123 @@ describe('unit test', function () {
                     }
                 });
             });
+        });
+
+        describe('#check_list_ticket', function() {
+            var testSuit = {
+                'should return false for non text type': {
+                    args: [{
+                        MsgType: ['event'],
+                        Event: ['CLICK'],
+                        EventKey: ['key']
+                    }],
+                    return: false
+                },
+                'should return true for text 查票': {
+                    args: [{
+                        MsgType: ['text'],
+                        Content: ['查票']
+                    }],
+                    return: true
+                },
+                'should return true for menu ticket get': {
+                    args: [{
+                        MsgType: ['event'],
+                        Event: ['CLICK'],
+                        EventKey: [basicInfo.WEIXIN_EVENT_KEYS['ticket_get']]
+                    }],
+                    return: true
+                }
+            };
+            for (var description in testSuit) {
+                it(description, generator(testSuit[description], handlerTicket.check_list_ticket));
+            }
+        });
+
+        describe('#faire_list_ticket', function() {
+            var send = sinon.stub();
+            send.returnsArg(0);
+
+            var EventEmitter = require('events').EventEmitter;
+            var sendAsyncCallStub = new EventEmitter();
+            sendAsyncCallStub.stub = function (msg) {
+                setImmediate(function () {
+                    sendAsyncCallStub.emit('called');
+                });
+                return msg;
+            };
+            var stubSpy = sinon.spy(sendAsyncCallStub, 'stub');
+
+            beforeEach(function () {
+                stubSpy.reset();
+                sendAsyncCallStub.removeAllListeners();
+            });
+            var testSuit = {
+                'should send 请先绑定学号。': {
+                    args: [
+                        {
+                            MsgType: ['text'],
+                            Content: ['查票'],
+                            FromUserName: ['from'],
+                            ToUserName: ['to']
+                        },
+                        {
+                            send: sendAsyncCallStub.stub
+                        }
+                    ],
+                    check: function (done) {
+                        sendAsyncCallStub.on('called', function() {
+                            should(stubSpy.callCount).be.eql(1);
+                            should(stubSpy.firstCall.returnValue).be.a.String.and.match(/请先绑定学号。/);
+                            done();
+                        });
+                    }
+                },
+                'should send 没有找到属于您的票哦': {
+                    args: [
+                        {
+                            MsgType: ['text'],
+                            Content: ['查票'],
+                            FromUserName: ['student1'],
+                            ToUserName: ['to']
+                        },
+                        {
+                            send: sendAsyncCallStub.stub
+                        }
+                    ],
+                    check: function (done) {
+                        sendAsyncCallStub.on('called', function() {
+                            should(stubSpy.callCount).be.eql(1);
+                            should(stubSpy.firstCall.returnValue).be.a.String.and.match(/没有找到属于您的票哦/);
+                            done();
+                        });
+                    }
+                },
+                'should send ticket list': {
+                    args: [
+                        {
+                            MsgType: ['text'],
+                            Content: ['查票'],
+                            FromUserName: ['student'],
+                            ToUserName: ['to']
+                        },
+                        {
+                            send: sendAsyncCallStub.stub
+                        }
+                    ],
+                    check: function (done) {
+                        sendAsyncCallStub.on('called', function() {
+                            should(stubSpy.callCount).be.eql(1);
+                            should(stubSpy.firstCall.returnValue).be.a.String.and.match(/以下列表中是您抢到的票。/);
+                            done();
+                        });
+                    }
+                }
+            };
+            for(var des in testSuit) {
+                it(des, generator(testSuit[des],handlerTicket.faire_list_ticket));
+            }
+
         });
 
         describe('#check_reinburse_ticket', function() {
