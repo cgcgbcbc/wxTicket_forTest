@@ -5,6 +5,16 @@ var models = require('../models/models')
 var activity_fixture = require('./fixtures/activity.json')
     ;
 
+for(var i = 0; i < activity_fixture.length; i++) {
+    if (activity_fixture[i].key === 'not_start') {
+        activity_fixture[i]['book_start']= Date.now()+3600000;
+        activity_fixture[i]['book_end']= Date.now()+2*3600000;
+        continue;
+    }
+    activity_fixture[i]['book_start']= Date.now()-3600000;
+    activity_fixture[i]['book_end']= Date.now()+3600000;
+}
+
 before(function(done) {
     db.dropDatabase(function(err) {
         if (err != null) throw  err;

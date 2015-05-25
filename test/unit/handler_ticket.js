@@ -4,9 +4,6 @@ var models = require('../../models/models')
     , db = models.db;
 var should = require('should');
 var sinon = require('sinon');
-var fixture = require('../fixtures/activity_detail');
-var freeze = false;
-var clock;
 
 describe('unit test', function () {
     describe('weixin_handler/handler_ticket', function () {
@@ -91,7 +88,6 @@ describe('unit test', function () {
             var EventEmitter = require('events').EventEmitter;
             var sendAsyncCallStub = new EventEmitter();
             sendAsyncCallStub.stub = function (msg) {
-                if (freeze) clock.restore();
                 setImmediate(function () {
                     sendAsyncCallStub.emit('called');
                 });
@@ -102,10 +98,6 @@ describe('unit test', function () {
             beforeEach(function () {
                 stubSpy.reset();
                 sendAsyncCallStub.removeAllListeners();
-                if (freeze) {
-                    clock.restore();
-                    freeze = false;
-                }
             });
 
             var testSuit = {
@@ -171,7 +163,7 @@ describe('unit test', function () {
                     args: [
                         {
                             MsgType: ['text'],
-                            Content: ['抢票 simple'],
+                            Content: ['抢票 not_start'],
                             FromUserName: ['student'],
                             ToUserName: ['to']
                         },
@@ -180,14 +172,11 @@ describe('unit test', function () {
                         }
                     ],
                     check: function (done) {
-                        clock = sinon.useFakeTimers(fixture.NOW);
-                        freeze = true;
                         sendAsyncCallStub.on('called', function () {
                             should(stubSpy.callCount).be.eql(1);
                             should(stubSpy.firstCall.returnValue).be.a.String.and.match(/后开始抢票，请耐心等待！/);
                             done();
                         });
-                        clock.tick(100);
                     }
                 },
                 'should send 恭喜，抢票成功！': {
@@ -203,14 +192,11 @@ describe('unit test', function () {
                         }
                     ],
                     check: function (done) {
-                        clock = sinon.useFakeTimers(fixture.NOW_CAN_BOOK);
-                        freeze = true;
                         sendAsyncCallStub.on('called', function () {
                             should(stubSpy.callCount).be.eql(1);
                             should(stubSpy.firstCall.returnValue).be.a.String.and.match(/恭喜，抢票成功！/);
                             done();
                         });
-                        clock.tick(100);
                     }
                 },
                 'should send 你已经有票啦，请用查票功能查看抢到的票吧！': {
@@ -226,14 +212,11 @@ describe('unit test', function () {
                         }
                     ],
                     check: function (done) {
-                        clock = sinon.useFakeTimers(fixture.NOW_CAN_BOOK);
-                        freeze = true;
                         sendAsyncCallStub.on('called', function () {
                             should(stubSpy.callCount).be.eql(1);
                             should(stubSpy.firstCall.returnValue).be.a.String.and.match(/你已经有票啦，请用查票功能查看抢到的票吧！/);
                             done();
                         });
-                        clock.tick(100);
                     }
                 },
                 'should send 对不起，票已抢完': {
@@ -249,46 +232,36 @@ describe('unit test', function () {
                         }
                     ],
                     check: function (done) {
-                        clock = sinon.useFakeTimers(fixture.NOW_CAN_BOOK);
-                        freeze = true;
                         sendAsyncCallStub.on('called', function () {
                             should(stubSpy.callCount).be.eql(1);
                             should(stubSpy.firstCall.returnValue).be.a.String.and.match(/对不起，票已抢完/);
                             done();
                         });
-                        clock.tick(100);
                     }
                 }
             };
             for (var des in testSuit) {
                 it(des, generator(testSuit[des], handlerTicket.faire_get_ticket));
             }
+            function get_ticket(student, activity) {
+                handlerTicket.faire_get_ticket({
+                        MsgType: ['text'],
+                        Content: ['抢票 '+ (activity || 'race_single')],
+                        FromUserName: [student || 'student3'],
+                        ToUserName: ['to']
+                    },
+                    {
+                        send: sendAsyncCallStub.stub
+                    });
+            }
             it('should deliver one ticket on race condition', function (done) {
-                handlerTicket.faire_get_ticket({
-                        MsgType: ['text'],
-                        Content: ['抢票 race'],
-                        FromUserName: ['student1'],
-                        ToUserName: ['to']
-                    },
-                    {
-                        send: sendAsyncCallStub.stub
-                    });
-                handlerTicket.faire_get_ticket({
-                        MsgType: ['text'],
-                        Content: ['抢票 race'],
-                        FromUserName: ['student2'],
-                        ToUserName: ['to']
-                    },
-                    {
-                        send: sendAsyncCallStub.stub
-                    });
-                clock = sinon.useFakeTimers(fixture.NOW_CAN_BOOK);
-                freeze = true;
+                get_ticket('student1', 'race');
+                get_ticket('student2', 'race');
                 sendAsyncCallStub.on('called', function () {
                     should(stubSpy.callCount).be.above(0);
                     if (stubSpy.callCount === 2) {
-                        should(stubSpy.firstCall.returnValue).be.a.String.and.match(/对不起，票已抢完/);
                         should(stubSpy.secondCall.returnValue).be.a.String.and.match(/点我查看电子票/);
+                        should(stubSpy.firstCall.returnValue).be.a.String.and.match(/对不起，票已抢完/);
                         db[models.tickets].find({$or: [{stu_id:"2014311934"}, {stu_id:"2014311935"}]}, function(err, docs) {
                             if (err) done(err);
                             should(docs.length).be.eql(1);
@@ -296,34 +269,15 @@ describe('unit test', function () {
                         });
                     }
                 });
-                clock.tick(100);
             });
             it('should deliver one ticket on race condition for single people', function (done) {
-                handlerTicket.faire_get_ticket({
-                        MsgType: ['text'],
-                        Content: ['抢票 race_single'],
-                        FromUserName: ['student3'],
-                        ToUserName: ['to']
-                    },
-                    {
-                        send: sendAsyncCallStub.stub
-                    });
-                handlerTicket.faire_get_ticket({
-                        MsgType: ['text'],
-                        Content: ['抢票 race_single'],
-                        FromUserName: ['student3'],
-                        ToUserName: ['to']
-                    },
-                    {
-                        send: sendAsyncCallStub.stub
-                    });
-                clock = sinon.useFakeTimers(fixture.NOW_CAN_BOOK);
-                freeze = true;
+                get_ticket();
+                get_ticket();
                 sendAsyncCallStub.on('called', function () {
                     should(stubSpy.callCount).be.above(0);
                     if (stubSpy.callCount === 2) {
-                        should(stubSpy.secondCall.returnValue).be.a.String.and.match(/点我查看电子票/);
                         should(stubSpy.firstCall.returnValue).be.a.String.and.match(/您的抢票请求正在处理中，请稍后通过查票功能查看抢票结果/);
+                        should(stubSpy.secondCall.returnValue).be.a.String.and.match(/点我查看电子票/);
                         db[models.tickets].find({stu_id:"2014311936"}, function(err, docs) {
                             if (err) done(err);
                             should(docs.length).be.eql(1);
@@ -331,7 +285,28 @@ describe('unit test', function () {
                         });
                     }
                 });
-                clock.tick(100);
+            });
+            it('should not insert two ticket with same unique id', function(done) {
+                var floorStub = sinon.stub(Math, 'random').onFirstCall().returns(0).onSecondCall().returns(0);
+                get_ticket('student1', 'stub_floor');
+                get_ticket('student2', 'stub_floor');
+                sendAsyncCallStub.on('called', function () {
+                    should(stubSpy.callCount).be.above(0);
+                    if (stubSpy.callCount === 2) {
+                        should(stubSpy.secondCall.returnValue).be.a.String.and.match(/点我查看电子票/);
+                        should(stubSpy.firstCall.returnValue).be.a.String.and.match(/点我查看电子票/);
+                        db[models.activities].find({key: 'stub_floor'}, function(err, docs) {
+                            if (err) done(err);
+                            should(docs.length).be.eql(1);
+                            db[models.tickets].find({activity: docs[0]._id}, function(err, docs) {
+                                if (err) done(err);
+                                should(docs.length).be.eql(2);
+                                should(docs[0].unique_id).not.be.eql(docs[1].unique_id);
+                                done();
+                            });
+                        });
+                    }
+                });
             });
         });
     });
