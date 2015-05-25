@@ -1,5 +1,6 @@
 [
   {
+    "_id": "5562dd803164564a23b7269f",
     "book_end": 1.4304132e+12,
     "book_start": 1.4304096e+12,
     "description": "this is an activity",
@@ -80,6 +81,21 @@
     "pic_url": "pic",
     "place": "some place",
     "remain_tickets": 2,
+    "start_time": 1.4330016e+12,
+    "status": 1
+  },
+  {
+    "_id": "5562e19b61fe7b8f24a70b3a",
+    "book_end": 1.4304132e+12,
+    "book_start": 1.4304096e+12,
+    "description": "this is an activity",
+    "end_time": 1.4330052e+12,
+    "key": "checkin",
+    "name": "for checkin",
+    "need_seat": 0,
+    "pic_url": "pic",
+    "place": "some place",
+    "remain_tickets": 4,
     "start_time": 1.4330016e+12,
     "status": 1
   }
