@@ -1,8 +1,15 @@
 [
   {
-    "_id": "5562e38d812b35062552ee0c",
-    "stu_id": 2014311933,
+    "stu_id": "2014311933",
     "unique_id": "wdLNvbtd2eRzPbTVrhEH7e16RzG5xsbf",
+    "activity": "5562e19b61fe7b8f24a70b3a",
+    "status": 1,
+    "seat": "",
+    "cost": 0
+  },
+  {
+    "stu_id": "2014311937",
+    "unique_id": "ylvmhEij5tZkwRnpm4DFzIQvxueI8WGw",
     "activity": "5562e19b61fe7b8f24a70b3a",
     "status": 1,
     "seat": "",

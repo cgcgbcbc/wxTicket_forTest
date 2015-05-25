@@ -21,7 +21,7 @@ for(i = 0; i < activity_fixture.length; i++) {
 }
 
 tickets_fixture = tickets_fixture.map(function(item) {
-    item._id = models.getIDClass(item._id);
+    item._id = item._id && models.getIDClass(item._id);
     item.activity = models.getIDClass(item.activity);
     return item;
 });
@@ -35,7 +35,7 @@ before(function(done) {
                 if (err != null) throw err;
                 db[models.activities].insert(activity_fixture, function(err) {
                     if (err != null) throw err;
-                    db[models.students].insert([{weixin_id: "student", stu_id: "2014311933", status:1}, {weixin_id: "student1", stu_id: "2014311934", status:1}, {weixin_id: "student2", stu_id: "2014311935", status:1}, {weixin_id: "student3", stu_id: "2014311936", status:1}], function(err) {
+                    db[models.students].insert([{weixin_id: "student", stu_id: "2014311933", status:1}, {weixin_id: "student1", stu_id: "2014311934", status:1}, {weixin_id: "student2", stu_id: "2014311935", status:1}, {weixin_id: "student3", stu_id: "2014311936", status:1}, {weixin_id: "checkin", stu_id: "2014311937", status:1}], function(err) {
                         if(err != null) throw err;
                         db[models.tickets].insert(tickets_fixture, function(err) {
                             if (err !=null) throw err;
