@@ -287,7 +287,8 @@ describe('unit test', function () {
                 });
             });
             it('should not insert two ticket with same unique id', function(done) {
-                var floorStub = sinon.stub(Math, 'random').onFirstCall().returns(0).onSecondCall().returns(0);
+                var floorStub = sinon.stub(Math, 'random');
+                for(var i = 0; i < 64; i++) floorStub.onCall(i).returns(0);
                 get_ticket('student1', 'stub_floor');
                 get_ticket('student2', 'stub_floor');
                 sendAsyncCallStub.on('called', function () {
@@ -308,6 +309,160 @@ describe('unit test', function () {
                     }
                 });
             });
+        });
+
+        describe('#check_reinburse_ticket', function() {
+            var testSuit = {
+                'should return false if not text': {
+                    args: [{
+                        MsgType: ['event']
+                    }],
+                    return: false
+                },
+                'should return false if not tuipiao': {
+                    args: [{
+                        MsgType: ['text'],
+                        Content: ['haha']
+                    }],
+                    return: false
+                },
+                'should return true if tuipiao': {
+                    args: [{
+                        MsgType: ['text'],
+                        Content: ['退票']
+                    }],
+                    return: true
+                },
+                'should return true if tuipiao with activity': {
+                    args: [{
+                        MsgType: ['text'],
+                        Content: ['退票 haha']
+                    }],
+                    return: true
+                }
+            };
+            for(var des in testSuit) {
+                it(des, generator(testSuit[des], handlerTicket.check_reinburse_ticket));
+            }
+        });
+
+        describe('#faire_reinburse_ticket', function() {
+            var send = sinon.stub();
+            send.returnsArg(0);
+
+            var EventEmitter = require('events').EventEmitter;
+            var sendAsyncCallStub = new EventEmitter();
+            sendAsyncCallStub.stub = function (msg) {
+                setImmediate(function () {
+                    sendAsyncCallStub.emit('called');
+                });
+                return msg;
+            };
+            var stubSpy = sinon.spy(sendAsyncCallStub, 'stub');
+
+            beforeEach(function () {
+                stubSpy.reset();
+                sendAsyncCallStub.removeAllListeners();
+            });
+
+            var testSuit = {
+                'should use command with activity': {
+                    args: [
+                        {
+                            Content: ['退票'],
+                            FromUserName: ['from'],
+                            ToUserName: ['to']
+                        },
+                        {
+                            send: send
+                        }
+                    ],
+                    check: function() {
+                        should(send.callCount).be.eql(1);
+                        should(send.firstCall.returnValue).be.a.String.and.match(/请使用“退票 活动代称”的命令完成指定活动的退票。/);
+                    }
+                },
+                'should send 请先绑定学号。': {
+                    args: [
+                        {
+                            Content: ['退票 haha'],
+                            FromUserName: ['from'],
+                            ToUserName: ['to']
+                        },
+                        {
+                            send: sendAsyncCallStub.stub
+                        }
+                    ],
+                    check: function(done) {
+                        sendAsyncCallStub.on('called', function() {
+                            should(stubSpy.callCount).be.eql(1);
+                            should(stubSpy.firstCall.returnValue).be.a.String.and.match(/请先绑定学号。/);
+                            done();
+                        });
+                    }
+                },
+                'should send 目前没有符合要求的活动处于退票期。': {
+                    args: [
+                        {
+                            Content: ['退票 haha'],
+                            FromUserName: ['student'],
+                            ToUserName: ['to']
+                        },
+                        {
+                            send: sendAsyncCallStub.stub
+                        }
+                    ],
+                    check: function(done) {
+                        sendAsyncCallStub.on('called', function() {
+                            should(stubSpy.callCount).be.eql(1);
+                            should(stubSpy.firstCall.returnValue).be.a.String.and.match(/目前没有符合要求的活动处于退票期。/);
+                            done();
+                        });
+                    }
+                },
+                'should send 未找到您的抢票记录或您的票已经支付': {
+                    args: [
+                        {
+                            Content: ['退票 race'],
+                            FromUserName: ['student'],
+                            ToUserName: ['to']
+                        },
+                        {
+                            send: sendAsyncCallStub.stub
+                        }
+                    ],
+                    check: function(done) {
+                        sendAsyncCallStub.on('called', function() {
+                            should(stubSpy.callCount).be.eql(1);
+                            should(stubSpy.firstCall.returnValue).be.a.String.and.match(/未找到您的抢票记录或您的票已经支付/);
+                            done();
+                        });
+                    }
+                },
+                'should send 退票成功。': {
+                    args: [
+                        {
+                            Content: ['退票 simple'],
+                            FromUserName: ['student'],
+                            ToUserName: ['to']
+                        },
+                        {
+                            send: sendAsyncCallStub.stub
+                        }
+                    ],
+                    check: function(done) {
+                        sendAsyncCallStub.on('called', function() {
+                            should(stubSpy.callCount).be.eql(1);
+                            should(stubSpy.firstCall.returnValue).be.a.String.and.match(/退票成功。/);
+                            done();
+                        });
+                    }
+                }
+            };
+            for(var des in testSuit) {
+                it(des, generator(testSuit[des],handlerTicket.faire_reinburse_ticket));
+            }
+
         });
     });
 });
