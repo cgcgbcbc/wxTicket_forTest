@@ -29,3 +29,5 @@ exports = module.exports = data;
 exports.SUCCESS = success;
 
 exports.NOW = new Date(2015, 4-1, 30, 0, 0, 0).getTime();
+
+exports.NOW_CAN_BOOK = new Date(2015, 5-1, 1, 0, 1, 0).getTime();
