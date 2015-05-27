@@ -1,8 +1,12 @@
 language: node_js
 node_js:
   - "0.12"
-before_script: "npm install -g istanbul"
+before_script:
+  - "npm install -g istanbul"
+  - "npm install -g codeclimate-test-reporter"
 script: "npm run-script test-ci"
-after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+after_script:
+  - "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+  - "codeclimate < lcov.info"
 services:
   - mongodb
