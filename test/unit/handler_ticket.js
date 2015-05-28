@@ -4,8 +4,18 @@ var models = require('../../models/models')
     , db = models.db;
 var should = require('should');
 var sinon = require('sinon');
+var util = require('../util');
 
 describe('unit test', function () {
+    before(function(done) {
+        util.clearData(function(err) {
+            if (err != null) done(err);
+            util.loadStudent(function(err) {
+                if (err != null) done(err);
+                util.loadActivity(done);
+            });
+        });
+    });
     describe('weixin_handler/handler_ticket', function () {
         function generator(testCase, func) {
             testCase.check = testCase.check || function () {
@@ -22,6 +32,7 @@ describe('unit test', function () {
         }
 
         describe('#verifyStu', function () {
+
             it('should fail with non exist weixin id', function (done) {
                 var ifFail = function () {
                     done();
@@ -246,71 +257,75 @@ describe('unit test', function () {
             function get_ticket(student, activity) {
                 handlerTicket.faire_get_ticket({
                         MsgType: ['text'],
-                        Content: ['抢票 '+ (activity || 'race_single')],
-                        FromUserName: [student || 'student3'],
+                        Content: ['抢票 '+ activity ],
+                        FromUserName: [student],
                         ToUserName: ['to']
                     },
                     {
                         send: sendAsyncCallStub.stub
                     });
             }
-            it('should deliver one ticket on race condition', function (done) {
-                get_ticket('student1', 'race');
-                get_ticket('student2', 'race');
-                sendAsyncCallStub.on('called', function () {
-                    should(stubSpy.callCount).be.above(0);
-                    if (stubSpy.callCount === 2) {
-                        should(stubSpy.secondCall.returnValue).be.a.String.and.match(/点我查看电子票/);
-                        should(stubSpy.firstCall.returnValue).be.a.String.and.match(/对不起，票已抢完/);
-                        db[models.tickets].find({$or: [{stu_id:"2014311934"}, {stu_id:"2014311935"}]}, function(err, docs) {
-                            if (err) done(err);
-                            should(docs.length).be.eql(1);
-                            done();
-                        });
-                    }
-                });
-            });
-            it('should deliver one ticket on race condition for single people', function (done) {
-                get_ticket();
-                get_ticket();
-                sendAsyncCallStub.on('called', function () {
-                    should(stubSpy.callCount).be.above(0);
-                    if (stubSpy.callCount === 2) {
-                        should(stubSpy.firstCall.returnValue).be.a.String.and.match(/您的抢票请求正在处理中，请稍后通过查票功能查看抢票结果/);
-                        should(stubSpy.secondCall.returnValue).be.a.String.and.match(/点我查看电子票/);
-                        db[models.tickets].find({stu_id:"2014311936"}, function(err, docs) {
-                            if (err) done(err);
-                            should(docs.length).be.eql(1);
-                            done();
-                        });
-                    }
-                });
-            });
-            it('should not insert two ticket with same unique id', function(done) {
-                var cache = Math.random;
-                var floorStub = sinon.stub(Math, 'random');
-                for(var i = 0; i < 64; i++) floorStub.onCall(i).returns(0);
-                floorStub.returns(Math.random());
-                get_ticket('student2', 'stub_floor');
-                get_ticket('student3', 'stub_floor');
-                sendAsyncCallStub.on('called', function () {
-                    should(stubSpy.callCount).be.above(0);
-                    if (stubSpy.callCount === 2) {
-                        should(stubSpy.secondCall.returnValue).be.a.String.and.match(/点我查看电子票/);
-                        should(stubSpy.firstCall.returnValue).be.a.String.and.match(/点我查看电子票/);
-                        db[models.activities].find({key: 'stub_floor'}, function(err, docs) {
-                            if (err) done(err);
-                            should(docs.length).be.eql(1);
-                            db[models.tickets].find({activity: docs[0]._id}, function(err, docs) {
+
+            describe('race condition testing', function() {
+                it('should deliver one ticket on race condition', function (done) {
+                    get_ticket('student1', 'race');
+                    get_ticket('student2', 'race');
+                    sendAsyncCallStub.on('called', function () {
+                        should(stubSpy.callCount).be.above(0);
+                        if (stubSpy.callCount === 2) {
+                            should(stubSpy.secondCall.returnValue).be.a.String.and.match(/点我查看电子票/);
+                            should(stubSpy.firstCall.returnValue).be.a.String.and.match(/对不起，票已抢完/);
+                            db[models.tickets].find({$or: [{stu_id:"2014311934"}, {stu_id:"2014311935"}]}, function(err, docs) {
                                 if (err) done(err);
-                                should(docs.length).be.eql(2);
-                                should(docs[0].unique_id).not.be.eql(docs[1].unique_id);
+                                should(docs.length).be.eql(1);
                                 done();
                             });
-                        });
-                    }
+                        }
+                    });
+                });
+                it('should deliver one ticket on race condition for single people', function (done) {
+                    get_ticket('student3', 'race_single');
+                    get_ticket('student3', 'race_single');
+                    sendAsyncCallStub.on('called', function () {
+                        should(stubSpy.callCount).be.above(0);
+                        if (stubSpy.callCount === 2) {
+                            should(stubSpy.firstCall.returnValue).be.a.String.and.match(/您的抢票请求正在处理中，请稍后通过查票功能查看抢票结果/);
+                            should(stubSpy.secondCall.returnValue).be.a.String.and.match(/点我查看电子票/);
+                            db[models.tickets].find({stu_id:"2014311936"}, function(err, docs) {
+                                if (err) done(err);
+                                should(docs.length).be.eql(1);
+                                done();
+                            });
+                        }
+                    });
+                });
+                it('should not insert two ticket with same unique id', function(done) {
+                    var cache = Math.random;
+                    var floorStub = sinon.stub(Math, 'random');
+                    for(var i = 0; i < 64; i++) floorStub.onCall(i).returns(0);
+                    floorStub.returns(cache());
+                    get_ticket('student2', 'stub_floor');
+                    get_ticket('student3', 'stub_floor');
+                    sendAsyncCallStub.on('called', function () {
+                        should(stubSpy.callCount).be.above(0);
+                        if (stubSpy.callCount === 2) {
+                            should(stubSpy.secondCall.returnValue).be.a.String.and.match(/点我查看电子票/);
+                            should(stubSpy.firstCall.returnValue).be.a.String.and.match(/点我查看电子票/);
+                            db[models.activities].find({key: 'stub_floor'}, function(err, docs) {
+                                if (err) done(err);
+                                should(docs.length).be.eql(1);
+                                db[models.tickets].find({activity: docs[0]._id}, function(err, docs) {
+                                    if (err) done(err);
+                                    should(docs.length).be.eql(2);
+                                    should(docs[0].unique_id).not.be.eql(docs[1].unique_id);
+                                    done();
+                                });
+                            });
+                        }
+                    });
                 });
             });
+
         });
 
         describe('#check_list_ticket', function() {
