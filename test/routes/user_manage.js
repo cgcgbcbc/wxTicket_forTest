@@ -5,7 +5,8 @@
 var request = require('supertest')
     , should = require('should')
     , app = require('../../app')
-    , agent = request.agent(app);
+    , agent = request.agent(app)
+    , util = require('../util');
 
 var fixture = require('../fixtures/activity_detail');
 
@@ -13,16 +14,22 @@ var sinon = require('sinon');
 
 describe('test routes/user_manage', function() {
     before(function(done) {
-        agent
-            .post("/login")
-            .send({
-                username: "admin",
-                password: "pwd"
+        util.clearData(function(err) {
+            if (err != null) done(err);
+            util.loadUser(function(err) {
+                if (err != null) done(err);
+                agent
+                    .post("/login")
+                    .send({
+                        username: "admin",
+                        password: "pwd"
+                    })
+                    .expect(function(res) {
+                        should(res.text).be.a.String.and.match(/success/);
+                    })
+                    .end(done);
             })
-            .expect(function(res) {
-                should(res.text).be.a.String.and.match(/success/);
-            })
-            .end(done);
+        });
     });
     describe('/users/manage/detail', function() {
         describe('#POST', function() {

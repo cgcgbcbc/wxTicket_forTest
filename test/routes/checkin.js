@@ -5,21 +5,34 @@
 var request = require('supertest')
     , should = require('should')
     , app = require('../../app')
-    , agent = request.agent(app);
+    , agent = request.agent(app)
+    , util = require('../util');
 
 var baseUrl = '/users/manage/checkin';
 describe('test routes/checkin', function() {
     before(function(done) {
-        agent
-            .post("/login")
-            .send({
-                username: "admin",
-                password: "pwd"
-            })
-            .expect(function(res) {
-                should(res.text).be.a.String.and.match(/success/);
-            })
-            .end(done);
+        util.clearData(function (err) {
+            if (err != null) done(err);
+            util.loadUser(function(err) {
+                if (err != null) done(err);
+                util.loadActivity(function(err) {
+                    if (err != null) done(err);
+                    util.loadTickets(function(err) {
+                        if (err != null) done(err);
+                        agent
+                            .post("/login")
+                            .send({
+                                username: "admin",
+                                password: "pwd"
+                            })
+                            .expect(function(res) {
+                                should(res.text).be.a.String.and.match(/success/);
+                            })
+                            .end(done);
+                    });
+                });
+            });
+        });
     });
     describe('/', function() {
         describe('#GET', function() {

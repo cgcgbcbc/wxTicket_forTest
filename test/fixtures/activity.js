@@ -90,20 +90,20 @@ module.exports = [
         "remain_tickets": 2,
         "start_time": Date.now() + 3600000 * 2,
         "status": 1
+    },
+    {
+        "_id": mongojs.ObjectId("5562e19b61fe7b8f24a70b3a"),
+        "book_end": Date.now() + 3600000,
+        "book_start": Date.now() - 3600000,
+        "description": "this is an activity",
+        "end_time": Date.now() + 3600000 * 3,
+        "key": "checkin",
+        "name": "for checkin",
+        "need_seat": 0,
+        "pic_url": "pic",
+        "place": "some place",
+        "remain_tickets": 4,
+        "start_time": Date.now() + 3600000 * 2,
+        "status": 1
     }
-    //{
-    //  "_id": mongojs.ObjectId("5562e19b61fe7b8f24a70b3a"),
-    //  "book_end": 1.4304132e+12,
-    //  "book_start": 1.4304096e+12,
-    //  "description": "this is an activity",
-    //  "end_time": 1.4330052e+12,
-    //  "key": "checkin",
-    //  "name": "for checkin",
-    //  "need_seat": 0,
-    //  "pic_url": "pic",
-    //  "place": "some place",
-    //  "remain_tickets": 4,
-    //  "start_time": 1.4330016e+12,
-    //  "status": 1
-    //}
 ];

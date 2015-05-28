@@ -6,6 +6,7 @@ var models = require('../../models/models')
 var userFixture = require('../fixtures/manager.json');
 var studentFixture = require('../fixtures/student.json');
 var activityFixture = require('../fixtures/activity');
+var ticketFixture = require('../fixtures/tickets');
 
 exports = module.exports;
 exports.loadFixture = loadFixture;
@@ -13,6 +14,7 @@ exports.clearData = clearData;
 exports.loadUser = loadUser;
 exports.loadStudent = loadStudent;
 exports.loadActivity = loadActivity;
+exports.loadTickets = loadTickets;
 
 
 function loadFixture(collection, data, callback) {
@@ -33,4 +35,8 @@ function loadStudent(callback) {
 
 function loadActivity(callback) {
     loadFixture(models.activities, activityFixture, callback);
+}
+
+function loadTickets(callback) {
+    loadFixture(models.tickets, ticketFixture, callback);
 }

@@ -1,8 +1,9 @@
-[
+var mongojs = require('mongojs');
+module.exports = [
   {
     "stu_id": "2014311933",
     "unique_id": "wdLNvbtd2eRzPbTVrhEH7e16RzG5xsbf",
-    "activity": "5562e19b61fe7b8f24a70b3a",
+    "activity": mongojs.ObjectId("5562e19b61fe7b8f24a70b3a"),
     "status": 1,
     "seat": "",
     "cost": 0
@@ -10,7 +11,7 @@
   {
     "stu_id": "2014311937",
     "unique_id": "ylvmhEij5tZkwRnpm4DFzIQvxueI8WGw",
-    "activity": "5562e19b61fe7b8f24a70b3a",
+    "activity": mongojs.ObjectId("5562e19b61fe7b8f24a70b3a"),
     "status": 1,
     "seat": "",
     "cost": 0
@@ -18,7 +19,7 @@
   {
     "stu_id": "2014311937",
     "unique_id": "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-    "activity": "5562dd803164564a23b7269f",
+    "activity": mongojs.ObjectId("5562e19b61fe7b8f24a70b3b"),
     "status": 1,
     "seat": "",
     "cost": 0
@@ -26,9 +27,9 @@
   {
     "stu_id": "2014311937",
     "unique_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "activity": "5562e19b61fe7b8f24a70b3a",
+    "activity": mongojs.ObjectId("5562e19b61fe7b8f24a70b3a"),
     "status": 1,
     "seat": "",
     "cost": 0
   }
-]
+];
