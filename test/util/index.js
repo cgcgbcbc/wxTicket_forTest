@@ -5,7 +5,7 @@ var models = require('../../models/models')
     , db = models.db;
 
 exports = module.exports;
-exports.loadFixture = loadFixtadd;
+exports.loadFixture = loadFixture;
 exports.clearData = clearData;
 
 
