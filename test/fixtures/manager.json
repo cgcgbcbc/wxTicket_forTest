@@ -1,0 +1,12 @@
+[
+  {
+    "user":"admin",
+    "password":"pwd",
+    "manager":true
+  },
+  {
+    "user":"user",
+    "password":"pwd",
+    "manager":false
+  }
+]

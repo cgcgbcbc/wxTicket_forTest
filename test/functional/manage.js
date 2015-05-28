@@ -4,6 +4,8 @@
 
 const Browser = require('zombie');
 
+var util = require('../util');
+
 function fillDetailPage(browser, config) {
     var operation,data;
     function forEach(o, f) {
@@ -28,6 +30,13 @@ function fillDetailPage(browser, config) {
 
 describe("functional test", function() {
     Browser.localhost('127.0.0.1', process.env.PORT || 4600);
+
+    before(function(done) {
+        util.clearData(function(err) {
+            if (err != null) done(err);
+            util.loadUser(done);
+        });
+    });
 
     describe("add detail", function() {
         var browser;
