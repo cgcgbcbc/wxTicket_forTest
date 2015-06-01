@@ -5,9 +5,16 @@
 var request = require('supertest')
     , should = require('should')
     , app = require('../app')
-    , agent = request.agent(app);
+    , agent = request.agent(app)
+    , util = require('./util');
 
 describe('example', function() {
+    before(function(done) {
+        util.clearData(function(err) {
+            if (err != null) done(err);
+            util.loadUser(done);
+        });
+    });
     it('should return 200 when get /', function(done) {
         agent
             .get('/')
