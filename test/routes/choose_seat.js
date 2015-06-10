@@ -18,6 +18,15 @@ describe('test route/choose_seat', function() {
             util.loadChooseTicket(done);
         });
     });
+    describe('GET', function() {
+        it('should render choose seat fast', function renderSeatTest(done) {
+            agent
+                .get(baseUrl + '?ticketid=wdLNvbtd2eRzPbTVrhEH7e16RzG5xsbf')
+                .expect(200)
+                .end(done);
+        });
+    });
+
     describe('#POST', function() {
         it('should send ticketid is required! with no ticketid', function(done) {
             agent
@@ -85,7 +94,7 @@ describe('test route/choose_seat', function() {
     });
 
     describe('concurrent choosing seat', function() {
-        before(function(done) {
+        beforeEach(function(done) {
             util.clearData(function(err) {
                 if (err != null) done(err);
                 util.loadChooseTicket(done);
