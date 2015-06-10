@@ -8,6 +8,7 @@ var studentFixture = require('../fixtures/student.json');
 var activityFixture = require('../fixtures/activity');
 var ticketFixture = require('../fixtures/tickets');
 var chooseSeatFixture = require('../fixtures/choose_seat');
+var chooseAreaFixture = require('../fixtures/choose_area');
 
 exports = module.exports;
 exports.loadFixture = loadFixture;
@@ -17,6 +18,7 @@ exports.loadStudent = loadStudent;
 exports.loadActivity = loadActivity;
 exports.loadTickets = loadTickets;
 exports.loadChooseTicket = loadChooseSeat;
+exports.loadChooseArea = loadChooseArea;
 exports.addStudent = addStudent;
 exports.generateStudent = generateStudent;
 
@@ -51,6 +53,16 @@ function loadChooseSeat(callback) {
         loadFixture(models.seats, chooseSeatFixture.seat, function(err) {
             if (err != null) callback(err);
             loadFixture(models.tickets, chooseSeatFixture.ticket, callback);
+        });
+    });
+}
+
+function loadChooseArea(callback) {
+    loadFixture(models.activities, chooseAreaFixture.activity, function(err) {
+        if (err != null) callback(err);
+        loadFixture(models.seats, chooseAreaFixture.seat, function(err) {
+            if (err != null) callback(err);
+            loadFixture(models.tickets, chooseAreaFixture.ticket, callback);
         });
     });
 }
